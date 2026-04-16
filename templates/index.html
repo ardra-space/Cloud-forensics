@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<!--
+  Cloud Forensics Automation System — Home / Upload Page
+  =======================================================
+  Purpose : Allows users to select and upload multiple files for forensic analysis.
+  Key UX  : Upload button is visually "disabled" on hover when no files are selected.
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Upload files to the Cloud Forensics Automation System for metadata extraction and analysis." />
+  <title>Cloud Forensics — Upload Files</title>
+  <!-- Our custom stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       TOP NAVIGATION BAR
+       ═══════════════════════════════════════ -->
+  <header class="topbar" role="banner">
+    <!-- Brand / Logo -->
+    <a href="{{ url_for('index') }}" class="topbar-brand">
+      <span class="brand-icon">🔍</span>
+      Cloud<span class="accent">Forensics</span>
+    </a>
+
+    <!-- Navigation links -->
+    <nav aria-label="Main navigation">
+      <ul class="topbar-nav">
+        <li><a href="{{ url_for('index') }}" class="active" id="nav-home">Upload</a></li>
+        <li><a href="{{ url_for('dashboard') }}" id="nav-dashboard">Dashboard</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       FLASH MESSAGES (success / warning)
+       ═══════════════════════════════════════ -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" role="alert">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════ -->
+  <main class="page-wrapper" id="main-content">
+
+    <!-- Hero / Introduction -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-badge">🛡️ E-commerce Breach Detection &nbsp;&middot;&nbsp; File Evidence Collector</div>
+      <h1 id="hero-heading">Cloud <span>Forensics</span> Automation</h1>
+      <p>Simulates collecting evidence of file tampering in an E-commerce data breach scenario.<br>
+         Upload files to record their <strong>Creation</strong> and <strong>Last Modified</strong> dates into a secure CSV report.</p>
+    </section>
+
+    <!-- ── Upload Card ── -->
+    <div class="card upload-card" id="upload-card">
+      <div class="card-header">
+        <span class="card-title">📁 Select Files for Analysis</span>
+        <!-- Shows how many files are chosen -->
+        <span id="file-count-badge" aria-live="polite" style="font-size:0.8rem;color:var(--text-secondary);"></span>
+      </div>
+
+      <div class="card-body">
+        <!--
+          Upload Form
+          - action="/upload"  → sends to Flask /upload route
+          - method="POST"     → required for file uploads
+          - enctype           → required when uploading files
+          - multiple          → allows selecting more than one file
+        -->
+        <form id="upload-form"
+              action="{{ url_for('upload') }}"
+              method="POST"
+              enctype="multipart/form-data">
+
+          <!-- Drop Zone / Click-to-browse area -->
+          <div class="drop-zone" id="drop-zone" role="button"
+               aria-label="Click or drag files here to upload">
+            <!-- Hidden real file input — covers the entire drop zone -->
+            <input type="file"
+                   name="files"
+                   id="file-input"
+                   multiple
+                   aria-label="File upload input" />
+
+            <span class="drop-icon" aria-hidden="true">📂</span>
+            <p class="drop-title">Click to browse or drag &amp; drop</p>
+            <p class="drop-sub">Supports any file type &bull; Up to 50 MB per upload</p>
+          </div>
+
+          <!-- File Preview List (shown after selection) -->
+          <div class="file-list" id="file-list" aria-live="polite">
+            <p class="file-list-title">Selected files</p>
+            <div id="file-items"></div>
+          </div>
+
+          <!--
+            Submit Button
+            ─────────────
+            DISABLED LOOK when no files selected:
+              - JS adds class 'disabled-look' on mouseenter when input has 0 files
+              - Once files are chosen, class is removed → button shows full color
+            The button is always type="submit" but JS shows the disabled visual
+            as a UX cue without blocking the browser's form submission guard.
+          -->
+          <button type="submit"
+                  id="submit-btn"
+                  class="btn-submit"
+                  aria-describedby="submit-hint">
+            <span id="submit-icon" aria-hidden="true">🔬</span>
+            <span id="submit-text">Upload &amp; Analyse</span>
+          </button>
+          <p id="submit-hint" style="font-size:0.78rem;color:var(--text-secondary);text-align:center;margin-top:0.4rem;">
+            Select files above, then click to analyse
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Information Tiles ── -->
+    <div class="info-grid" role="list" aria-label="System features">
+      <div class="info-tile" role="listitem">
+        <div class="tile-icon">📂</div>
+        <div class="tile-title">Product Files</div>
+        <div class="tile-desc">Detects if e-commerce product data files were secretly modified</div>
+      </div>
+      <div class="info-tile" role="listitem">
+        <div class="tile-icon">💳</div>
+        <div class="tile-title">Payment Scripts</div>
+        <div class="tile-desc">Flags payment script changes that may indicate a breach</div>
+      </div>
+      <div class="info-tile" role="listitem">
+        <div class="tile-icon">⚠️</div>
+        <div class="tile-title">Malicious Uploads</div>
+        <div class="tile-desc">Identifies suspiciously modified or backdated uploaded files</div>
+      </div>
+      <div class="info-tile" role="listitem">
+        <div class="tile-icon">📊</div>
+        <div class="tile-title">Transaction Logs</div>
+        <div class="tile-desc">Checks altered transaction logs for evidence of tampering</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo">
+    Cloud Forensics Automation System &mdash; Student Project &nbsp;|&nbsp; Built with Python Flask
+  </footer>
+
+  <!-- ═══════════════════════════════════════
+       JAVASCRIPT — Simple Upload Logic
+       ═══════════════════════════════════════ -->
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitText = document.getElementById('submit-text');
+    const fileCountBadge = document.getElementById('file-count-badge');
+
+    // When files are selected, update the count and button text
+    fileInput.addEventListener('change', function() {
+        const count = this.files.length;
+        if (count > 0) {
+            fileCountBadge.textContent = count + " file(s) selected";
+            submitBtn.classList.remove('hover-warning');
+            submitText.textContent = "Upload & Analyse " + count + " Files";
+        } else {
+            fileCountBadge.textContent = "";
+            submitText.textContent = "Upload & Analyse";
+        }
+    });
+
+    // Amber warning on hover IF no files are selected
+    submitBtn.addEventListener('mouseenter', function() {
+        if (fileInput.files.length === 0) {
+            this.classList.add('hover-warning');
+            submitText.textContent = "Select a file first!";
+        }
+    });
+
+    submitBtn.addEventListener('mouseleave', function() {
+        if (fileInput.files.length === 0) {
+            this.classList.remove('hover-warning');
+            submitText.textContent = "Upload & Analyse";
+        }
+    });
+  </script>
+
+</body>
+</html>

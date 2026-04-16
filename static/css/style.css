@@ -1,0 +1,161 @@
+/*
+ * Cloud Forensics Automation System — Simplified Stylesheet
+ * =========================================================
+ * Purpose: Essential professional styling for the student project.
+ * Focus  : Clean layout, Excel-style table, and suspicious highlighting.
+ */
+
+/* ── Google Font Import ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Design Tokens ── */
+:root {
+  --bg-page       : #f0f4f8;
+  --bg-card       : #ffffff;
+  --bg-header     : #0f172a;
+  --accent        : #0891b2;
+  --accent-light  : #e0f2fe;
+  --accent-hover  : #0369a1;
+  --text-primary  : #0f172a;
+  --text-secondary: #475569;
+  --border        : #cbd5e1;
+  --row-alt       : #f8fafc;
+  --red-tint      : #fff1f2;
+  --red-text      : #be123c;
+  --green-text    : #15803d;
+  --radius        : 10px;
+  --font-main     : 'Inter', sans-serif;
+  --font-mono     : 'JetBrains Mono', monospace;
+}
+
+/* ── Global Reset ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* ── Top Navigation ── */
+.topbar {
+  background: var(--bg-header);
+  color: #fff;
+  padding: 0 2rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-brand {
+  font-weight: 700; color: #fff; text-decoration: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.topbar-brand span.accent { color: #38bdf8; }
+.topbar-nav { display: flex; gap: 1rem; list-style: none; }
+.topbar-nav a {
+  color: #94a3b8; text-decoration: none; font-size: 0.9rem;
+  padding: 0.4rem 0.8rem; border-radius: 6px;
+}
+.topbar-nav a:hover, .topbar-nav a.active { color: #fff; background: rgba(255,255,255,0.1); }
+
+/* ── Layout ── */
+.page-wrapper { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.page-wrapper.wide { max-width: 1200px; }
+
+/* ── Flash Messages ── */
+.flash-container { max-width: 900px; margin: 1rem auto; padding: 0 1.5rem; }
+.flash {
+  padding: 0.8rem 1.2rem; border-radius: 6px; margin-bottom: 0.5rem;
+  font-size: 0.9rem; border-left: 4px solid;
+}
+.flash.success { background: #d1fae5; color: #065f46; border-color: #10b981; }
+.flash.warning { background: #fef9c3; color: #713f12; border-color: #eab308; }
+
+/* ── Card & Hero ── */
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+.card-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.card-body { padding: 1.5rem; }
+
+.hero { text-align: center; padding-bottom: 2rem; }
+.hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+/* ── Upload Zone ── */
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  padding: 3rem 2rem; text-align: center; background: var(--row-alt);
+  position: relative; transition: 0.2s;
+}
+.drop-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+.drop-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+#file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* ── Buttons ── */
+.btn {
+  padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600;
+  text-decoration: none; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-danger { background: #fff1f2; color: var(--red-text); border: 1px solid #fecdd3; }
+.btn-danger:hover { background: #ffe4e6; }
+
+.btn-submit {
+  width: 100%; margin-top: 1.5rem; padding: 0.8rem;
+  background: var(--accent); color: #fff; border: none; border-radius: 6px;
+  font-weight: 700; cursor: pointer; font-size: 1rem;
+}
+.btn-submit.hover-warning { background: #b45309; }
+
+/* ── Dashboard Toolbar ── */
+.dash-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.dash-toolbar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dash-toolbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* ── Stats ── */
+.stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat-card { background: #fff; border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); display: flex; align-items: center; gap: 1rem; }
+.stat-value { font-size: 1.5rem; font-weight: 700; }
+.stat-label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
+
+/* ── Table ── */
+.table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.forensics-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 0.9rem; }
+.forensics-table thead { background: #1e293b; color: #fff; }
+.forensics-table th, .forensics-table td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+.forensics-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.forensics-table tr.row-suspicious { background: var(--red-tint) !important; }
+.cell-filename, .cell-time, .cell-size { font-family: var(--font-mono); font-size: 0.85rem; }
+
+.badge { padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; }
+.badge.normal { background: #dcfce7; color: var(--green-text); }
+.badge.suspicious { background: #fecdd3; color: var(--red-text); }
+
+/* ── Info Grid ── */
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.info-tile { background: #fff; border: 1px solid var(--border); padding: 1.5rem; border-radius: var(--radius); text-align: center; }
+.tile-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.tile-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
+.tile-desc { font-size: 0.85rem; color: var(--text-secondary); }
+
+.footer { text-align: center; padding: 3rem 0; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border); margin-top: 2rem; }
