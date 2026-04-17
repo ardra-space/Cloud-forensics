@@ -1,0 +1,9 @@
+order_id,customer_name,email,card_last4,amount,status,shipping_address
+ORD-1001,John Smith,john.smith@gmail.com,4242,249.99,completed,"123 Main St, New York, NY 10001"
+ORD-1002,Sarah Johnson,sarah.j@outlook.com,1234,89.50,completed,"456 Elm Ave, Los Angeles, CA 90001"
+ORD-1003,Michael Brown,mbrown@yahoo.com,5678,349.00,processing,"789 Oak Rd, Chicago, IL 60601"
+ORD-1004,Emily Davis,emily.davis@gmail.com,9012,149.99,completed,"321 Pine St, Houston, TX 77001"
+ORD-1005,David Wilson,dwilson@hotmail.com,3456,699.00,shipped,"654 Maple Dr, Phoenix, AZ 85001"
+ORD-1006,Jessica Martinez,jmartinez@gmail.com,7890,29.99,completed,"987 Cedar Ln, Philadelphia, PA 19101"
+ORD-1007,Robert Taylor,rtaylor@company.com,2345,999.00,processing,"147 Birch Blvd, San Antonio, TX 78201"
+ORD-1008,Lisa Anderson,l.anderson@gmail.com,6789,179.50,shipped,"258 Willow Way, San Diego, CA 92101"

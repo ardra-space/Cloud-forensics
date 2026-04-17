@@ -1,20 +1,6 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Logs
+uploads/
 forensics_results.csv
-
-# Uploaded Files (Evidence Store)
-uploads/*
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Environments
-.venv/
-env/
+*.pyc
+.env
 venv/
-ENV/

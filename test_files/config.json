@@ -1,0 +1,33 @@
+{
+  "app_name": "ShopSecure E-Commerce",
+  "version": "3.2.1",
+  "environment": "production",
+  "database": {
+    "host": "db.internal.shopsecure.com",
+    "port": 5432,
+    "name": "shopdb_prod",
+    "user": "db_admin",
+    "password": "Pr0d@Pass#2024!"
+  },
+  "payment": {
+    "provider": "SecurePay",
+    "api_key": "fake_api_key_for_testing_purposes_only",
+    "webhook_secret": "whsec_AbCdEfGhIjKlMnOpQrStUvWxYz123456",
+    "currency": "USD",
+    "capture_mode": "automatic"
+  },
+  "smtp": {
+    "host": "smtp.mailgun.org",
+    "port": 587,
+    "user": "noreply@shopsecure.com",
+    "password": "Mail@Secure2024"
+  },
+  "session": {
+    "secret": "s3cr3t_s3ss10n_k3y_sh0ps3cur3",
+    "timeout_minutes": 30
+  },
+  "logging": {
+    "level": "INFO",
+    "output": "/var/log/shopsecure/app.log"
+  }
+}

@@ -72,10 +72,11 @@ body {
 }
 .flash.success { background: #d1fae5; color: #065f46; border-color: #10b981; }
 .flash.warning { background: #fef9c3; color: #713f12; border-color: #eab308; }
+.flash.info    { background: #e0f2fe; color: #0c4a6e; border-color: #0891b2; }
 
 /* ── Card & Hero ── */
 .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-.card-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.card-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 600; }
 .card-body { padding: 1.5rem; }
 
 .hero { text-align: center; padding-bottom: 2rem; }
@@ -91,12 +92,13 @@ body {
 }
 .drop-zone:hover { border-color: var(--accent); background: var(--accent-light); }
 .drop-icon { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
-#file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+#file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 
 /* ── Buttons ── */
 .btn {
   padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: 600;
   text-decoration: none; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 0.5rem;
+  font-family: var(--font-main); font-size: 0.9rem;
 }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-hover); }
@@ -107,8 +109,9 @@ body {
   width: 100%; margin-top: 1.5rem; padding: 0.8rem;
   background: var(--accent); color: #fff; border: none; border-radius: 6px;
   font-weight: 700; cursor: pointer; font-size: 1rem;
+  font-family: var(--font-main); transition: background 0.2s;
 }
-.btn-submit.hover-warning { background: #b45309; }
+.btn-submit:hover { background: var(--accent-hover); }
 
 /* ── Dashboard Toolbar ── */
 .dash-toolbar {
@@ -119,7 +122,7 @@ body {
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
-.dash-toolbar-title {
+.dash-toolbar h2 {
   font-size: 1.3rem;
   font-weight: 700;
   display: flex;

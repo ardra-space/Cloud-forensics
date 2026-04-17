@@ -12,7 +12,7 @@ import os
 import csv
 import time
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 
 # ─────────────────────────────────────────────
@@ -26,6 +26,10 @@ app.secret_key = "cloud_forensics_secret_key_2024"
 # Folder where uploaded files are temporarily stored for analysis
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create folder if it doesn't exist
+
+# Folder containing sample test files for download
+TEST_FILES_FOLDER = "test_files"
+os.makedirs(TEST_FILES_FOLDER, exist_ok=True)
 
 # CSV file that permanently stores the forensic results
 CSV_FILE = "forensics_results.csv"
@@ -47,9 +51,6 @@ def format_size(bytes_size):
         return f"{bytes_size / 1024:.2f} KB"
     else:
         return f"{bytes_size / (1024 * 1024):.2f} MB"
-
-
-
 
 
 def extract_metadata(filepath):
@@ -75,9 +76,8 @@ def extract_metadata(filepath):
     creation_time  = datetime.fromtimestamp(ctime_raw).strftime("%Y-%m-%d %H:%M:%S")
     modified_time  = datetime.fromtimestamp(mtime_raw).strftime("%Y-%m-%d %H:%M:%S")
 
-    # Suspicious: if the file was modified AFTER it was created
-    # (Could indicate backdating or tampering in a real forensics scenario)
-    suspicious = mtime_raw > ctime_raw
+    # Suspicious: if the file was modified AFTER it was created (allow 1 second buffer)
+    suspicious = (mtime_raw - ctime_raw) > 1.0
 
     return {
         "filename"      : os.path.basename(filepath),
@@ -98,10 +98,7 @@ def save_to_csv(records):
         fieldnames = ["filename", "creation_time", "modified_time",
                       "size_display", "size_kb", "suspicious"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        
-        # Always write header since we are overwriting
         writer.writeheader()
-
         for record in records:
             writer.writerow(record)
 
@@ -131,53 +128,36 @@ def read_from_csv():
 
 @app.route("/")
 def index():
-    """
-    HOME PAGE — Shows the file upload interface.
-    """
+    """HOME PAGE — Shows the file upload interface."""
     return render_template("index.html")
 
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    """
-    UPLOAD HANDLER — Processes the uploaded files.
-
-    Steps:
-      1. Accept files from the form submission
-      2. Save each file temporarily to the uploads/ folder
-      3. Extract forensic metadata from each file
-      4. Save all metadata to the CSV log
-      5. Redirect the user to the dashboard
-    """
-    # Retrieve the list of uploaded files from the form
+    """UPLOAD HANDLER — Processes the uploaded files."""
     files = request.files.getlist("files")
 
-    # Guard: if no files were selected, go back with a warning
     if not files or all(f.filename == "" for f in files):
         flash("⚠️ No files were selected. Please choose at least one file.", "warning")
         return redirect(url_for("index"))
 
-    records = []  # Will hold metadata for all uploaded files
+    records = []
 
     for file in files:
         if file.filename == "":
-            continue  # Skip any empty file slots
+            continue
 
-        # Sanitize the filename to prevent directory traversal attacks
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-
-        # Save the file temporarily so we can inspect its metadata
         file.save(filepath)
 
-        # Extract forensic metadata from the saved file
         metadata = extract_metadata(filepath)
         records.append(metadata)
 
     if records:
-        # Persist the extracted metadata to our CSV log
         save_to_csv(records)
-        flash(f"✅ Successfully analysed {len(records)} file(s). Results saved.", "success")
+        file_word = "file" if len(records) == 1 else "files"
+        flash(f"✅ Successfully analysed {len(records)} {file_word}. Results saved.", "success")
     else:
         flash("⚠️ No valid files were processed.", "warning")
 
@@ -186,24 +166,17 @@ def upload():
 
 @app.route("/dashboard")
 def dashboard():
-    """
-    DASHBOARD PAGE — Reads the CSV and displays forensic results.
-    """
+    """DASHBOARD PAGE — Reads the CSV and displays forensic results."""
     records = read_from_csv()
     return render_template("dashboard.html", records=records)
 
 
 @app.route("/clear", methods=["POST"])
 def clear():
-    """
-    CLEAR ROUTE — Deletes the CSV log and all uploaded files.
-    Useful for resetting the system during demos.
-    """
-    # Remove CSV log
+    """CLEAR ROUTE — Deletes the CSV log and all uploaded files."""
     if os.path.isfile(CSV_FILE):
         os.remove(CSV_FILE)
 
-    # Remove all files in the uploads folder
     for f in os.listdir(UPLOAD_FOLDER):
         os.remove(os.path.join(UPLOAD_FOLDER, f))
 
@@ -211,9 +184,18 @@ def clear():
     return redirect(url_for("index"))
 
 
+@app.route("/download-report")
+def download_report():
+    """DOWNLOAD ROUTE — Allows the user to download the CSV report."""
+    if os.path.isfile(CSV_FILE):
+        return send_file(CSV_FILE, as_attachment=True, download_name="forensics_report.csv")
+    else:
+        flash("⚠️ No report available to download yet.", "warning")
+        return redirect(url_for("dashboard"))
+
+
 # ─────────────────────────────────────────────
 #  Entry Point
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
-    # debug=True → auto-reloads server on code changes (useful during development)
     app.run(debug=True, port=5000)

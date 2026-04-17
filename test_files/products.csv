@@ -1,0 +1,11 @@
+product_id,product_name,category,price,stock,sku,last_updated_by
+P001,Nike Air Max 270,Footwear,149.99,320,NK-AM-270-BLK,admin
+P002,Samsung Galaxy S24,Electronics,899.00,75,SAM-S24-256,warehouse_mgr
+P003,Apple AirPods Pro,Electronics,249.99,210,APL-APP-2GEN,admin
+P004,Levi's 501 Jeans,Apparel,69.99,540,LV-501-32W,admin
+P005,Sony WH-1000XM5,Electronics,349.00,88,SNY-WH1000-XM5,warehouse_mgr
+P006,Adidas Ultraboost 23,Footwear,189.99,175,AD-UB23-WHT,admin
+P007,Instant Pot Duo 7-in-1,Kitchen,99.99,300,IP-DUO-7IN1,admin
+P008,Kindle Paperwhite,Electronics,139.99,430,AMZ-KPW-11GEN,admin
+P009,Fitbit Charge 6,Wearables,159.99,220,FIT-CHG6-BLK,system_override
+P010,LEGO Star Wars Set,Toys,79.99,160,LG-SW-75375,admin

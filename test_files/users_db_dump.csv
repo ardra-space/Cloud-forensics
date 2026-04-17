@@ -1,0 +1,7 @@
+user_id,username,email,role,password_hash,last_login,account_status,created_at
+U001,admin,admin@shopsecure.com,superadmin,$2b$12$xK9mN3pQ7rT2vY8wZ1aB4O,2024-04-10 09:15:22,active,2022-01-15
+U002,john.smith,john.smith@gmail.com,customer,$2b$12$aB4cD6eF0gH5iJ7kL9mN1P,2024-04-09 14:30:45,active,2023-03-22
+U003,sarah.j,sarah.j@outlook.com,customer,$2b$12$rT2vY8wZ1aB4cD6eF0gH5i,2024-04-08 11:22:10,active,2023-07-11
+U004,ghost_user,unknown@proton.me,customer,$2b$12$zZ0xX9wW8vV7uU6tT5sS4r,2024-04-17 03:47:01,active,2024-04-17
+U005,warehouse_mgr,wh.manager@shopsecure.com,manager,$2b$12$qQ1rR2sS3tT4uU5vV6wW7x,2024-04-05 08:00:00,active,2022-06-01
+U006,system_override,sys@internal.local,superadmin,$2b$12$yY8zZ9aA0bB1cC2dD3eE4f,2024-04-17 03:47:05,active,2024-04-17

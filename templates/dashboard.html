@@ -1,45 +1,25 @@
 <!DOCTYPE html>
-<!--
-  Cloud Forensics Automation System — Dashboard Page
-  ===================================================
-  Purpose : Displays file evidence log with Creation & Last Modified timestamps
-            to simulate breach detection in an E-commerce scenario.
-  Data    : Passed from Flask as `records`
--->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Forensic analysis dashboard — view extracted metadata and file anomaly reports." />
-  <title>Cloud Forensics — File Evidence Log</title>
-  <!-- Custom stylesheet -->
+  <title>Cloud Forensics — Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-
 </head>
 <body>
-
-  <!-- ═══════════════════════════════════════
-       TOP NAVIGATION BAR
-       ═══════════════════════════════════════ -->
-  <header class="topbar" role="banner">
-    <a href="{{ url_for('index') }}" class="topbar-brand">
-      <span class="brand-icon">🔍</span>
-      Cloud<span class="accent">Forensics</span>
-    </a>
-    <nav aria-label="Main navigation">
+  <header class="topbar">
+    <a href="{{ url_for('index') }}" class="topbar-brand">🔍 Cloud<span class="accent">Forensics</span></a>
+    <nav>
       <ul class="topbar-nav">
-        <li><a href="{{ url_for('index') }}" id="nav-home">Upload</a></li>
-        <li><a href="{{ url_for('dashboard') }}" class="active" id="nav-dashboard">Dashboard</a></li>
+        <li><a href="{{ url_for('index') }}">Upload</a></li>
+        <li><a href="{{ url_for('dashboard') }}" class="active">Dashboard</a></li>
       </ul>
     </nav>
   </header>
 
-  <!-- ═══════════════════════════════════════
-       FLASH MESSAGES
-       ═══════════════════════════════════════ -->
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-      <div class="flash-container" role="alert">
+      <div class="flash-container">
         {% for category, message in messages %}
           <div class="flash {{ category }}">{{ message }}</div>
         {% endfor %}
@@ -47,203 +27,91 @@
     {% endif %}
   {% endwith %}
 
-  <!-- ═══════════════════════════════════════
-       MAIN DASHBOARD CONTENT
-       ═══════════════════════════════════════ -->
-  <main class="page-wrapper wide" id="main-content">
-
-    <!-- ── Summary Statistics Bar ── -->
-    <div class="stats-bar" role="list" aria-label="Summary statistics">
-
-      <!-- Total files analysed -->
-      <div class="stat-card" role="listitem">
-        <span class="stat-icon" aria-hidden="true">📂</span>
-        <div>
-          <div class="stat-value" id="stat-total">{{ records | length }}</div>
-          <div class="stat-label">Files Analysed</div>
-        </div>
+  <main class="page-wrapper wide">
+    <div class="dash-toolbar">
+      <h2>💼 Evidence Log</h2>
+      <div class="dash-toolbar-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">➕ New Scan</a>
+        <a href="{{ url_for('download_report') }}" class="btn" style="background: #e2e8f0; color: #0f172a;">⬇️ Download Report</a>
+        <form action="{{ url_for('clear') }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-danger">🗑️ Clear Records</button>
+        </form>
       </div>
-
-      <!-- Suspicious files count -->
-      <div class="stat-card" role="listitem">
-        <span class="stat-icon" aria-hidden="true">⚠️</span>
-        <div>
-          <div class="stat-value" id="stat-suspicious" style="color: var(--red-text);">
-            {{ records | selectattr('suspicious') | list | length }}
-          </div>
-          <div class="stat-label">Suspicious Files</div>
-        </div>
-      </div>
-
-      <!-- Clean / Normal files -->
-      <div class="stat-card" role="listitem">
-        <span class="stat-icon" aria-hidden="true">✅</span>
-        <div>
-          <div class="stat-value" id="stat-clean" style="color: var(--green-text);">
-            {{ records | rejectattr('suspicious') | list | length }}
-          </div>
-          <div class="stat-label">Clean Files</div>
-        </div>
-      </div>
-
-      <!-- Total data scanned -->
-      <div class="stat-card" role="listitem">
-        <span class="stat-icon" aria-hidden="true">💾</span>
-        <div>
-          {% set total_kb = namespace(value=0) %}
-          {% for r in records %}
-            {% set total_kb.value = total_kb.value + r.size_kb | float %}
-          {% endfor %}
-          <div class="stat-value" id="stat-size">
-            {% if total_kb.value >= 1024 %}
-              {{ "%.2f"|format(total_kb.value / 1024) }} MB
-            {% else %}
-              {{ "%.1f"|format(total_kb.value) }} KB
-            {% endif %}
-          </div>
-          <div class="stat-label">Total Data Scanned</div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- ════════════════════════════════════════
-         SECTION 1 : FORENSICS DATA TABLE
-         ════════════════════════════════════════ -->
-    <section aria-labelledby="table-heading">
+    {% if records %}
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div>
+          <div class="stat-value">{{ records | length }}</div>
+          <div class="stat-label">Total Files</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-value" style="color: #be123c;">{{ records | selectattr('suspicious') | list | length }}</div>
+          <div class="stat-label">Suspicious</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <div class="stat-value" style="color: #15803d;">{{ records | rejectattr('suspicious') | list | length }}</div>
+          <div class="stat-label">Clean</div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
 
-      <!-- Toolbar row above the table -->
-      <div class="dash-toolbar">
-        <h2 class="dash-toolbar-title" id="table-heading">
-          💼 E-commerce File Evidence Log
-        </h2>
-        <div class="dash-toolbar-actions">
-          <a href="{{ url_for('index') }}" class="btn btn-primary" id="btn-upload-more">
-            ⬅️ Go Back to Upload
-          </a>
+    <div class="table-wrapper">
+      <table class="forensics-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>File Name</th>
+            <th>Creation Time</th>
+            <th>Last Modified</th>
+            <th>Size</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
           {% if records %}
-          <form action="{{ url_for('clear') }}" method="POST" id="form-clear" style="display:inline;"
-                onsubmit="return confirm('⚠️ Are you sure? This will permanently delete all forensic evidence logs.');">
-            <button type="submit" class="btn btn-danger" id="btn-clear">
-              🗑️ Clear All Records
-            </button>
-          </form>
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- ── Excel-style Table ── -->
-      <div class="table-wrapper" role="region" aria-label="Forensic results table">
-        <table class="forensics-table" id="forensics-table" aria-describedby="table-heading">
-
-          <!-- Column Headers -->
-          <thead>
-            <tr>
-              <th class="col-num" scope="col" title="Row number">#</th>
-              <th scope="col">File Name</th>
-              <th scope="col">Creation Time</th>
-              <th scope="col">Last Modified</th>
-              <th scope="col" style="text-align:right;">File Size</th>
-              <th scope="col" style="text-align:center;">Status</th>
+            {% for record in records %}
+            <tr class="{{ 'row-suspicious' if record.suspicious else '' }}">
+              <td>{{ loop.index }}</td>
+              <td class="cell-filename">{{ record.filename }}</td>
+              <td class="cell-time">{{ record.creation_time }}</td>
+              <td class="cell-time">{{ record.modified_time }}</td>
+              <td class="cell-size">{{ record.size_display }}</td>
+              <td>
+                {% if record.suspicious %}
+                  <span class="badge suspicious">⚠️ Suspicious</span>
+                {% else %}
+                  <span class="badge normal">✅ Normal</span>
+                {% endif %}
+              </td>
             </tr>
-          </thead>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                No evidence records found. <a href="{{ url_for('index') }}" style="color: var(--accent);">Upload files to begin analysis.</a>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
 
-          <!-- Table Body -->
-          <tbody>
-            {% if records %}
-              {% for record in records %}
-              <tr class="{{ 'row-suspicious' if record.suspicious else '' }}"
-                  title="{{ '⚠ Suspicious: Modified time is later than creation time' if record.suspicious else 'Clean: Timestamps appear normal' }}">
-
-                <!-- Row number -->
-                <td class="col-num" style="text-align:center; color:var(--text-secondary); font-family:var(--font-mono);">
-                  {{ loop.index }}
-                </td>
-
-                <!-- File name -->
-                <td class="cell-filename" title="{{ record.filename }}">
-                  {{ record.filename }}
-                </td>
-
-                <!-- Creation timestamp -->
-                <td class="cell-time">
-                  🕐 {{ record.creation_time }}
-                </td>
-
-                <!-- Last modified timestamp -->
-                <td class="cell-time">
-                  ✏️ {{ record.modified_time }}
-                </td>
-
-                <!-- File size -->
-                <td class="cell-size">
-                  {{ record.size_display }}
-                </td>
-
-                <!-- Status badge -->
-                <td style="text-align:center;">
-                  {% if record.suspicious %}
-                    <span class="badge suspicious" role="status" aria-label="Suspicious file">
-                      ⚠️ Suspicious
-                    </span>
-                  {% else %}
-                    <span class="badge normal" role="status" aria-label="Clean file">
-                      ✅ Normal
-                    </span>
-                  {% endif %}
-                </td>
-
-              </tr>
-              {% endfor %}
-
-            {% else %}
-              <!-- Empty state -->
-              <tr>
-                <td colspan="6">
-                  <div class="empty-state">
-                    <div class="empty-icon" aria-hidden="true">📭</div>
-                    <p>No forensic records yet.<br>
-                      <a href="{{ url_for('index') }}" style="color:var(--accent);font-weight:600;">
-                        Upload files to begin analysis →
-                      </a>
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            {% endif %}
-          </tbody>
-
-        </table>
-      </div>
-
-      <!-- Legend below the table -->
-      {% if records %}
-      <div style="margin-top:0.75rem; display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-secondary);">
-          <span style="display:inline-block;width:14px;height:14px;background:var(--red-tint);border:1px solid var(--red-badge);border-radius:3px;"></span>
-          Suspicious — Modified time &gt; Creation time
-        </div>
-        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-secondary);">
-          <span style="display:inline-block;width:14px;height:14px;background:#fff;border:1px solid var(--border);border-radius:3px;"></span>
-          Normal — Timestamps consistent
-        </div>
-      </div>
-      {% endif %}
-
-    </section>
-
-
-
+    {% if records %}
+    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+      Evidence auto-logged to: <code>forensics_results.csv</code>
+    </p>
+    {% endif %}
   </main>
 
-  <!-- ═══════════════════════════════════════
-       FOOTER
-       ═══════════════════════════════════════ -->
-  <footer class="footer" role="contentinfo">
-    Cloud Forensics Automation System &mdash; Student Project &nbsp;|&nbsp; Built with Python Flask
+  <footer class="footer">
+    Cloud Forensics Automation System &mdash; Student Project Demo
   </footer>
-
-
-
 </body>
 </html>
