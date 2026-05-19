@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Forensics</title>
+  <title>Cloud Forensics — Dashboard</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1" />
   <script>
     // Theme Loader (prevent flicker)
@@ -21,8 +21,8 @@
     <div class="topbar-right">
       <nav>
         <ul class="topbar-nav">
-          <li><a href="{{ url_for('index') }}" class="active">Upload</a></li>
-          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+          <li><a href="{{ url_for('index') }}">Upload</a></li>
+          <li><a href="{{ url_for('dashboard') }}" class="active">Dashboard</a></li>
         </ul>
       </nav>
     </div>
@@ -38,73 +38,80 @@
     {% endif %}
   {% endwith %}
 
-  <main class="page-wrapper">
-    <section class="hero">
-      <h1>Cloud <span>Forensics</span> Automation</h1>
-      <p>Simulates collecting evidence of file tampering in an E-commerce data breach scenario. Upload files to record their Creation and Last Modified dates into a secure CSV report.</p>
-    </section>
-
-    <div class="card">
-      <div class="card-header">
-        <span>📁 Select Files for Analysis</span>
-      </div>
-      <div class="card-body">
-        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
-          <div class="drop-zone" id="drop-zone">
-            <input type="file" name="files" id="file-input" multiple style="display:none;" />
-            <span class="drop-icon">📁</span>
-            <p style="font-weight: 600; margin-bottom: 0.25rem;">Click to browse or drag & drop</p>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">Supports any file type • Up to 50 MB per upload</p>
-            <div id="file-list" style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono);"></div>
-          </div>
-          <button type="submit" class="btn-submit" id="submit-btn">📤 Upload & Analyse</button>
+  <main class="page-wrapper wide">
+    <div class="dash-toolbar">
+      <h2>💼 Evidence Log</h2>
+      <div class="dash-toolbar-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">+ New Scan</a>
+        <a href="{{ url_for('download_report') }}" class="btn btn-secondary" style="background: var(--border); color: var(--text-primary);">⬇️ Download Report</a>
+        <form action="{{ url_for('clear') }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-danger">🗑️ Clear Records</button>
         </form>
       </div>
     </div>
 
-    <div class="info-grid">
-      <div class="info-tile">
-        <div class="tile-icon">📦</div>
-        <div class="tile-title">Product Files</div>
-        <div class="tile-desc">Detects if e-commerce product data files were secretly modified.</div>
+    {% if records %}
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-value">{{ records | length }}</div>
+        <div class="stat-label">TOTAL FILES</div>
       </div>
-      <div class="info-tile">
-        <div class="tile-icon">💳</div>
-        <div class="tile-title">Payment Scripts</div>
-        <div class="tile-desc">Flags payment script changes that may indicate a breach.</div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--danger);">{{ records | selectattr('suspicious') | list | length }}</div>
+        <div class="stat-label">SUSPICIOUS</div>
       </div>
-      <div class="info-tile">
-        <div class="tile-icon">⚠️</div>
-        <div class="tile-title">Malicious Uploads</div>
-        <div class="tile-desc">Identifies suspiciously modified or backdated uploaded files.</div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--success);">{{ records | rejectattr('suspicious') | list | length }}</div>
+        <div class="stat-label">CLEAN</div>
       </div>
     </div>
+    {% endif %}
+
+    <div class="table-wrapper">
+      <table class="forensics-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>File Name</th>
+            <th>Creation Time</th>
+            <th>Last Modified</th>
+            <th>Size</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if records %}
+            {% for record in records %}
+            <tr class="{{ 'row-suspicious' if record.suspicious else '' }}">
+              <td>#{{ loop.index }}</td>
+              <td class="cell-filename">{{ record.filename }}</td>
+              <td class="cell-time">{{ record.creation_time }}</td>
+              <td class="cell-time">{{ record.modified_time }}</td>
+              <td class="cell-size">{{ record.size_display }}</td>
+              <td>
+                {% if record.suspicious %}
+                  <span class="badge suspicious">⚠️ Suspicious</span>
+                {% else %}
+                  <span class="badge normal">✅ Normal</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                No evidence discovered in the repository. <a href="{{ url_for('index') }}" style="color: var(--accent); font-weight: 600;">Initialize a new scan.</a>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if records %}
+    <p style="margin-top: 1.5rem; font-size: 0.85rem; color: #64748b;">
+      Evidence auto-logged to: forensics_results.csv
+    </p>
+    {% endif %}
   </main>
 
-  <script>
-    const input = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
-    const zone = document.getElementById('drop-zone');
-
-    // File Selection Logic
-    input.addEventListener('change', function () {
-      const files = Array.from(this.files);
-      if (files.length === 0) {
-        fileList.textContent = '';
-        return;
-      }
-      fileList.innerHTML = '<strong>Awaiting analysis:</strong><br>' +
-        files.map(f => `> ${f.name} [${(f.size / 1024).toFixed(1)} KB]`).join('<br>');
-    });
-
-    // Drag & drop feedback
-    zone.addEventListener('click', () => input.click());
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--primary)'; });
-    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
-    zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = ''; });
-
-    // Initialize Icon (if present)
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-  </script>
-</body>
-</html>
