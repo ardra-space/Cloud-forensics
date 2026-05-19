@@ -3,18 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Forensics — Upload Files</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <title>Cloud Forensics</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1" />
+  <script>
+    // Theme Loader (prevent flicker)
+    (function() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">
-    <a href="{{ url_for('index') }}" class="topbar-brand">🔍 Cloud<span class="accent">Forensics</span></a>
-    <nav>
-      <ul class="topbar-nav">
-        <li><a href="{{ url_for('index') }}" class="active">Upload</a></li>
-        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
-      </ul>
-    </nav>
+    <a href="{{ url_for('index') }}" class="topbar-brand">
+      🔍 Cloud<span class="accent">Forensics</span>
+    </a>
+    <div class="topbar-right">
+      <nav>
+        <ul class="topbar-nav">
+          <li><a href="{{ url_for('index') }}" class="active">Upload</a></li>
+          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -30,22 +41,23 @@
   <main class="page-wrapper">
     <section class="hero">
       <h1>Cloud <span>Forensics</span> Automation</h1>
-      <p>Simulates collecting evidence of file tampering in an E-commerce data breach scenario.<br>
-         Upload files to record their <strong>Creation</strong> and <strong>Last Modified</strong> dates into a secure CSV report.</p>
+      <p>Simulates collecting evidence of file tampering in an E-commerce data breach scenario. Upload files to record their Creation and Last Modified dates into a secure CSV report.</p>
     </section>
 
     <div class="card">
-      <div class="card-header">📁 Select Files for Analysis</div>
+      <div class="card-header">
+        <span>📁 Select Files for Analysis</span>
+      </div>
       <div class="card-body">
         <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
           <div class="drop-zone" id="drop-zone">
-            <input type="file" name="files" id="file-input" multiple />
-            <span class="drop-icon">📂</span>
-            <p>Click to browse or drag &amp; drop</p>
-            <small style="color: var(--text-secondary);">Supports any file type &bull; Up to 50 MB per upload</small>
-            <div id="file-list" style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-secondary);"></div>
+            <input type="file" name="files" id="file-input" multiple style="display:none;" />
+            <span class="drop-icon">📁</span>
+            <p style="font-weight: 600; margin-bottom: 0.25rem;">Click to browse or drag & drop</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Supports any file type • Up to 50 MB per upload</p>
+            <div id="file-list" style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono);"></div>
           </div>
-          <button type="submit" class="btn-submit" id="submit-btn">🔬 Upload &amp; Analyse</button>
+          <button type="submit" class="btn-submit" id="submit-btn">📤 Upload & Analyse</button>
         </form>
       </div>
     </div>
@@ -54,45 +66,45 @@
       <div class="info-tile">
         <div class="tile-icon">📦</div>
         <div class="tile-title">Product Files</div>
-        <div class="tile-desc">Detects if e-commerce product data files were secretly modified</div>
+        <div class="tile-desc">Detects if e-commerce product data files were secretly modified.</div>
       </div>
       <div class="info-tile">
         <div class="tile-icon">💳</div>
         <div class="tile-title">Payment Scripts</div>
-        <div class="tile-desc">Flags payment script changes that may indicate a breach</div>
+        <div class="tile-desc">Flags payment script changes that may indicate a breach.</div>
       </div>
       <div class="info-tile">
         <div class="tile-icon">⚠️</div>
         <div class="tile-title">Malicious Uploads</div>
-        <div class="tile-desc">Identifies suspiciously modified or backdated uploaded files</div>
+        <div class="tile-desc">Identifies suspiciously modified or backdated uploaded files.</div>
       </div>
     </div>
   </main>
 
-  <footer class="footer">
-    Cloud Forensics Automation System &mdash; Student Project Demo
-  </footer>
-
   <script>
     const input = document.getElementById('file-input');
     const fileList = document.getElementById('file-list');
-    const submitBtn = document.getElementById('submit-btn');
+    const zone = document.getElementById('drop-zone');
 
+    // File Selection Logic
     input.addEventListener('change', function () {
       const files = Array.from(this.files);
       if (files.length === 0) {
         fileList.textContent = '';
         return;
       }
-      fileList.innerHTML = '<strong>Selected files:</strong><br>' +
-        files.map(f => `&bull; ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join('<br>');
+      fileList.innerHTML = '<strong>Awaiting analysis:</strong><br>' +
+        files.map(f => `> ${f.name} [${(f.size / 1024).toFixed(1)} KB]`).join('<br>');
     });
 
-    // Drag & drop visual feedback
-    const zone = document.getElementById('drop-zone');
-    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--accent)'; });
+    // Drag & drop feedback
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--primary)'; });
     zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
     zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = ''; });
+
+    // Initialize Icon (if present)
+    const currentTheme = document.documentElement.getAttribute('data-theme');
   </script>
 </body>
 </html>
