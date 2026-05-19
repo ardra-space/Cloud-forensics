@@ -3,18 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Forensics — Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <title>Cloud Forensics</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1.1" />
+  <script>
+    // Theme Loader (prevent flicker)
+    (function() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
 </head>
 <body>
   <header class="topbar">
-    <a href="{{ url_for('index') }}" class="topbar-brand">🔍 Cloud<span class="accent">Forensics</span></a>
-    <nav>
-      <ul class="topbar-nav">
-        <li><a href="{{ url_for('index') }}">Upload</a></li>
-        <li><a href="{{ url_for('dashboard') }}" class="active">Dashboard</a></li>
-      </ul>
-    </nav>
+    <a href="{{ url_for('index') }}" class="topbar-brand">
+      🔍 Cloud<span class="accent">Forensics</span>
+    </a>
+    <div class="topbar-right">
+      <nav>
+        <ul class="topbar-nav">
+          <li><a href="{{ url_for('index') }}" class="active">Upload</a></li>
+          <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -27,91 +38,73 @@
     {% endif %}
   {% endwith %}
 
-  <main class="page-wrapper wide">
-    <div class="dash-toolbar">
-      <h2>💼 Evidence Log</h2>
-      <div class="dash-toolbar-actions">
-        <a href="{{ url_for('index') }}" class="btn btn-primary">➕ New Scan</a>
-        <a href="{{ url_for('download_report') }}" class="btn" style="background: #e2e8f0; color: #0f172a;">⬇️ Download Report</a>
-        <form action="{{ url_for('clear') }}" method="POST" style="display:inline;">
-          <button type="submit" class="btn btn-danger">🗑️ Clear Records</button>
+  <main class="page-wrapper">
+    <section class="hero">
+      <h1>Cloud <span>Forensics</span> Automation</h1>
+      <p>Simulates collecting evidence of file tampering in an E-commerce data breach scenario. Upload files to record their Creation and Last Modified dates into a secure CSV report.</p>
+    </section>
+
+    <div class="card">
+      <div class="card-header">
+        <span>📁 Select Files for Analysis</span>
+      </div>
+      <div class="card-body">
+        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+          <div class="drop-zone" id="drop-zone">
+            <input type="file" name="files" id="file-input" multiple style="display:none;" />
+            <span class="drop-icon">📁</span>
+            <p style="font-weight: 600; margin-bottom: 0.25rem;">Click to browse or drag & drop</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Supports any file type • Up to 50 MB per upload</p>
+            <div id="file-list" style="margin-top: 1.5rem; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono);"></div>
+          </div>
+          <button type="submit" class="btn-submit" id="submit-btn">📤 Upload & Analyse</button>
         </form>
       </div>
     </div>
 
-    {% if records %}
-    <div class="stats-bar">
-      <div class="stat-card">
-        <div>
-          <div class="stat-value">{{ records | length }}</div>
-          <div class="stat-label">Total Files</div>
-        </div>
+    <div class="info-grid">
+      <div class="info-tile">
+        <div class="tile-icon">📦</div>
+        <div class="tile-title">Product Files</div>
+        <div class="tile-desc">Detects if e-commerce product data files were secretly modified.</div>
       </div>
-      <div class="stat-card">
-        <div>
-          <div class="stat-value" style="color: #be123c;">{{ records | selectattr('suspicious') | list | length }}</div>
-          <div class="stat-label">Suspicious</div>
-        </div>
+      <div class="info-tile">
+        <div class="tile-icon">💳</div>
+        <div class="tile-title">Payment Scripts</div>
+        <div class="tile-desc">Flags payment script changes that may indicate a breach.</div>
       </div>
-      <div class="stat-card">
-        <div>
-          <div class="stat-value" style="color: #15803d;">{{ records | rejectattr('suspicious') | list | length }}</div>
-          <div class="stat-label">Clean</div>
-        </div>
+      <div class="info-tile">
+        <div class="tile-icon">⚠️</div>
+        <div class="tile-title">Malicious Uploads</div>
+        <div class="tile-desc">Identifies suspiciously modified or backdated uploaded files.</div>
       </div>
     </div>
-    {% endif %}
-
-    <div class="table-wrapper">
-      <table class="forensics-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>File Name</th>
-            <th>Creation Time</th>
-            <th>Last Modified</th>
-            <th>Size</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if records %}
-            {% for record in records %}
-            <tr class="{{ 'row-suspicious' if record.suspicious else '' }}">
-              <td>{{ loop.index }}</td>
-              <td class="cell-filename">{{ record.filename }}</td>
-              <td class="cell-time">{{ record.creation_time }}</td>
-              <td class="cell-time">{{ record.modified_time }}</td>
-              <td class="cell-size">{{ record.size_display }}</td>
-              <td>
-                {% if record.suspicious %}
-                  <span class="badge suspicious">⚠️ Suspicious</span>
-                {% else %}
-                  <span class="badge normal">✅ Normal</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="6" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
-                No evidence records found. <a href="{{ url_for('index') }}" style="color: var(--accent);">Upload files to begin analysis.</a>
-              </td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-
-    {% if records %}
-    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
-      Evidence auto-logged to: <code>forensics_results.csv</code>
-    </p>
-    {% endif %}
   </main>
 
-  <footer class="footer">
-    Cloud Forensics Automation System &mdash; Student Project Demo
-  </footer>
+  <script>
+    const input = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const zone = document.getElementById('drop-zone');
+
+    // File Selection Logic
+    input.addEventListener('change', function () {
+      const files = Array.from(this.files);
+      if (files.length === 0) {
+        fileList.textContent = '';
+        return;
+      }
+      fileList.innerHTML = '<strong>Awaiting analysis:</strong><br>' +
+        files.map(f => `> ${f.name} [${(f.size / 1024).toFixed(1)} KB]`).join('<br>');
+    });
+
+    // Drag & drop feedback
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'var(--primary)'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.style.borderColor = ''; });
+
+    // Initialize Icon (if present)
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+  </script>
 </body>
 </html>
